@@ -1,7 +1,11 @@
+using LicencePlateCom.API.Business;
+using LicencePlateCom.API.Database;
+using LicencePlateCom.API.Utilities;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Hosting;
 
 namespace LicencePlateCom.API
@@ -18,7 +22,14 @@ namespace LicencePlateCom.API
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddControllers();
+            services.AddControllers().AddNewtonsoftJson();
+            services.TryAddSingleton<IMongoContext, MongoContext>();
+            services.TryAddSingleton<IMessageService, MessageService>();
+            services.Configure<Settings>(c =>
+            {
+                c.ConnectionString = Configuration.GetConnectionString("LicencePlateCom");
+                c.DatabaseName = Configuration.GetSection("Database")["Name"];
+            });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -28,15 +39,9 @@ namespace LicencePlateCom.API
             {
                 app.UseDeveloperExceptionPage();
             }
-
             app.UseHttpsRedirection();
-
             app.UseRouting();
-
             app.UseAuthorization();
-            
-            app.Use
-
             app.UseEndpoints(endpoints => { endpoints.MapControllers(); });
         }
     }
