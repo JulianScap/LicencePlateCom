@@ -2,7 +2,7 @@
 
 namespace LicencePlateCom.API.Database.Entities
 {
-    public interface IValidable
+    public interface IValidatable
     {
         bool Validate(out IEnumerable<string> messages);
     }

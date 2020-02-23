@@ -2,40 +2,37 @@
 using System.Collections.Generic;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
+using LicencePlateCom.API.Database.Adapters;
 using LicencePlateCom.API.Database.Entities;
-using LicencePlateCom.API.Utilities;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 using MongoDB.Driver;
 
 namespace LicencePlateCom.API.Database
 {
-    public interface IMongoContext
+    public interface IMongoContext<T>
+        where T : ICollectible, new()
     {
-        bool Add<T>(T item) where T : ICollectible;
-        Task<IEnumerable<T>> Get<T>(Expression<Func<T, bool>> expression) where T : ICollectible, new();
-        Task<IEnumerable<T>> Get<T>(Expression<Func<T, bool>> expression, T example) where T : ICollectible;
+        bool Add(T item);
+        Task<IEnumerable<T>> Get(Expression<Func<T, bool>> expression);
     }
 
-    public class MongoContext : IMongoContext
+    public class MongoContext<T> : IMongoContext<T>
+        where T : ICollectible, new()
     {
-        private readonly ILogger<MongoContext> _logger;
-        private readonly IMongoDatabase _database;
+        private readonly ILogger<MongoContext<T>> _logger;
+        private readonly MongoCollectionAdapter<T> _collection;
 
-        public MongoContext(ILogger<MongoContext> logger, IOptions<Settings> settings)
+        public MongoContext(ILogger<MongoContext<T>> logger, MongoCollectionAdapter<T> collection)
         {
             _logger = logger;
-            IMongoClient client = new MongoClient(settings.Value.ConnectionString);
-            _database = client.GetDatabase(settings.Value.DatabaseName);
+            _collection = collection;
         }
 
-        public bool Add<T>(T item)
-            where T : ICollectible
+        public bool Add(T item)
         {
             try
             {
-                var collection = _database.GetCollection<T>(item.Collection);
-                collection.InsertOne(item);
+                _collection.InsertOne(item);
                 return true;
             }
             catch (Exception ex)
@@ -45,17 +42,9 @@ namespace LicencePlateCom.API.Database
             }
         }
 
-        public async Task<IEnumerable<T>> Get<T>(Expression<Func<T, bool>> expression)
-            where T : ICollectible, new()
+        public async Task<IEnumerable<T>> Get(Expression<Func<T, bool>> expression)
         {
-            return await Get(expression, new T()).ConfigureAwait(false);
-        }
-
-        public async Task<IEnumerable<T>> Get<T>(Expression<Func<T, bool>> expression, T example) where T : ICollectible
-        {
-            var collection = _database.GetCollection<T>(example.Collection);
-            var found = await collection.FindAsync(expression).ConfigureAwait(false);
-
+            var found = await _collection.FindAsync(expression).ConfigureAwait(false);
             return await found.ToListAsync().ConfigureAwait(false);
         }
     }

@@ -8,9 +8,7 @@ namespace LicencePlateCom.API.Test.Base
 {
     public abstract class BaseTest
     {
-        protected IConfiguration Configuration { get; }
-        private readonly ServiceCollection _serviceCollection;
-        private readonly ServiceProvider _serviceProvider;
+        private IConfiguration Configuration { get; }
         private readonly ILoggerFactory _loggerFactory;
 
         protected BaseTest()
@@ -19,13 +17,11 @@ namespace LicencePlateCom.API.Test.Base
                 .AddJsonFile("appsettings.json")
                 .Build();
 
-            _serviceCollection = new ServiceCollection();
-
-            _serviceProvider = _serviceCollection
+            var serviceProvider = new ServiceCollection()
                 .AddLogging()
                 .BuildServiceProvider();
 
-            _loggerFactory = _serviceProvider.GetService<ILoggerFactory>();
+            _loggerFactory = serviceProvider.GetService<ILoggerFactory>();
         }
 
         protected virtual IOptions<Settings> GetSettings()

@@ -8,12 +8,12 @@ namespace LicencePlateCom.API.Controllers
 {
     [ApiController]
     [Route("[controller]")]
-    public class MessageController : ControllerBase
+    public class MessageController : BaseController
     {
         private readonly ILogger<MessageController> _logger;
         private readonly IMessageService _messageService;
 
-        public MessageController(ILogger<MessageController> logger, IMessageService messageService)
+        public MessageController(ILogger<MessageController> logger, IMessageService messageService) : base(logger)
         {
             _logger = logger;
             _messageService = messageService;
@@ -39,21 +39,16 @@ namespace LicencePlateCom.API.Controllers
         }
 
         [HttpPut]
-        public ActionResult Put([FromBody] Message message)
+        public IActionResult Put([FromBody] Message message)
         {
-            if (message == null)
-            {
-                return BadRequest(new[] {"No message specified (null)."});
-            }
-
-            if (message.Validate(out var messages))
+            if (!Validate(message, out var messages, nameof(message)))
             {
                 return BadRequest(messages);
             }
 
             var saveResult = _messageService.SaveMessage(message);
 
-            return saveResult ? Ok() : StatusCode(StatusCodes.Status500InternalServerError);
+            return Result(saveResult);
         }
     }
 }

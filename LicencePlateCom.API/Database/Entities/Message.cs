@@ -3,7 +3,7 @@ using System.Linq;
 
 namespace LicencePlateCom.API.Database.Entities
 {
-    public class Message : AbstractEntity, IValidable
+    public class Message : AbstractEntity, IValidatable
     {
         public string Recipient { get; set; }
         public PredefinedMessage PredefinedMessage { get; set; }

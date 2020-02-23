@@ -2,27 +2,27 @@
 using System.Linq;
 using LicencePlateCom.API.Database;
 using LicencePlateCom.API.Database.Entities;
+using LicencePlateCom.API.Utilities;
 
 namespace LicencePlateCom.API.Business
 {
     public interface IMessageService
     {
-        bool SaveMessage(Message message);
+        Result SaveMessage(Message message);
     }
 
     public class MessageService : IMessageService
     {
-        private readonly IMongoContext _mongoContext;
+        private readonly IMongoContext<Message> _mongoContext;
 
-        public MessageService(IMongoContext mongoContext)
+        public MessageService(IMongoContext<Message> mongoContext)
         {
             _mongoContext = mongoContext;
         }
 
-        public virtual bool SaveMessage(Message message)
+        public virtual Result SaveMessage(Message message)
         {
-            _mongoContext.Add(message);
-            return true;
+            return (Result) _mongoContext.Add(message);
         }
 
         public virtual IEnumerable<Message> GetMessages(Message message)

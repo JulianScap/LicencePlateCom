@@ -23,6 +23,7 @@ namespace LicencePlateCom.API.Database.Entities
             return $"{GetType().Name} - {JsonConvert.SerializeObject(this, Formatting.None)}";
         }
 
+        [JsonIgnore]
         [BsonId]
         [BsonRepresentation(BsonType.ObjectId)]
         public string Id { get; set; }
