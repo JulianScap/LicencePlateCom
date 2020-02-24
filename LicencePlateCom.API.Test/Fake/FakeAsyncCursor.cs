@@ -13,13 +13,18 @@ namespace LicencePlateCom.API.Test.Fake
         {
             return FakeAsyncCursor<T, TS>.CreateInstance(items);
         }
-        
+
         public static FakeAsyncCursor<IEnumerable<TS>, TS> CreateInstance<TS>(params TS[] items)
         {
             return FakeAsyncCursor<IEnumerable<TS>, TS>.CreateInstance(items);
         }
+
+        public static FakeAsyncCursor<IEnumerable<TS>, TS> CreateInstance<TS>(IEnumerable<TS> items)
+        {
+            return FakeAsyncCursor<IEnumerable<TS>, TS>.CreateInstance(items);
+        }
     }
-    
+
     public class FakeAsyncCursor<T, TS> : IAsyncCursor<TS>
         where T: IEnumerable<TS>
     {
@@ -34,7 +39,7 @@ namespace LicencePlateCom.API.Test.Fake
         {
             _enumerator = items.GetEnumerator();
         }
-        
+
         public void Dispose()
         {
             _enumerator = null;

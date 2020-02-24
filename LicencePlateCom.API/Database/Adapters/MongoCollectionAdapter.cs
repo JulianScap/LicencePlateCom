@@ -21,14 +21,14 @@ namespace LicencePlateCom.API.Database.Adapters
         [Obsolete("Do not use", true)]
         public MongoCollectionAdapter() { }
 
-        public virtual void InsertOne(T item)
+        public virtual async Task InsertOneAsync(T item)
         {
-            _collection.InsertOne(item);
+            await _collection.InsertOneAsync(item).ConfigureAwait(false);
         }
 
         public virtual async Task<IAsyncCursor<T>> FindAsync(Expression<Func<T, bool>> expression)
         {
-            return await _collection.FindAsync(expression);
+            return await _collection.FindAsync(expression).ConfigureAwait(false);
         }
     }
 }

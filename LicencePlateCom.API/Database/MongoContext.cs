@@ -12,8 +12,8 @@ namespace LicencePlateCom.API.Database
     public interface IMongoContext<T>
         where T : ICollectible, new()
     {
-        bool Add(T item);
-        Task<IEnumerable<T>> Get(Expression<Func<T, bool>> expression);
+        Task<bool> AddAsync(T item);
+        Task<IEnumerable<T>> GetAsync(Expression<Func<T, bool>> expression);
     }
 
     public class MongoContext<T> : IMongoContext<T>
@@ -28,11 +28,11 @@ namespace LicencePlateCom.API.Database
             _collection = collection;
         }
 
-        public bool Add(T item)
+        public async Task<bool> AddAsync(T item)
         {
             try
             {
-                _collection.InsertOne(item);
+                await _collection.InsertOneAsync(item).ConfigureAwait(false);
                 return true;
             }
             catch (Exception ex)
@@ -42,7 +42,7 @@ namespace LicencePlateCom.API.Database
             }
         }
 
-        public async Task<IEnumerable<T>> Get(Expression<Func<T, bool>> expression)
+        public async Task<IEnumerable<T>> GetAsync(Expression<Func<T, bool>> expression)
         {
             var found = await _collection.FindAsync(expression).ConfigureAwait(false);
             return await found.ToListAsync().ConfigureAwait(false);

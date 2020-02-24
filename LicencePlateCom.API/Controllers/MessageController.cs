@@ -1,6 +1,6 @@
-﻿using LicencePlateCom.API.Business;
+﻿using System.Threading.Tasks;
+using LicencePlateCom.API.Business;
 using LicencePlateCom.API.Database.Entities;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 
@@ -39,14 +39,14 @@ namespace LicencePlateCom.API.Controllers
         }
 
         [HttpPut]
-        public IActionResult Put([FromBody] Message message)
+        public async Task<IActionResult> Put([FromBody] Message message)
         {
             if (!Validate(message, out var messages, nameof(message)))
             {
                 return BadRequest(messages);
             }
 
-            var saveResult = _messageService.SaveMessage(message);
+            var saveResult = await _messageService.SaveMessageAsync(message);
 
             return Result(saveResult);
         }

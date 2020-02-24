@@ -1,60 +1,39 @@
-﻿using System;
-using System.Linq.Expressions;
+﻿using System.Threading.Tasks;
 using LicencePlateCom.API.Database;
-using LicencePlateCom.API.Database.Adapters;
 using LicencePlateCom.API.Test.Base;
 using LicencePlateCom.API.Test.Entities;
-using LicencePlateCom.API.Test.Fake;
-using MongoDB.Driver;
-using Moq;
 using Xunit;
 
 namespace LicencePlateCom.API.Test.Database
 {
     public class MongoContextShould : BaseTest
     {
+        private readonly DbAccessTestClass _dummy = new DbAccessTestClass {Name = "Test"};
+
         private IMongoContext<DbAccessTestClass> GetContext(bool success = true)
         {
-            var logger = GetLogger<MongoContext<DbAccessTestClass>>();
-            var collection = new Mock<MongoCollectionAdapter<DbAccessTestClass>>();
-
-
-            var insertOneSetup = collection
-                .Setup(x =>
-                    x.InsertOne(It.IsAny<DbAccessTestClass>()));
-            if (!success)
-            {
-                insertOneSetup.Throws<Exception>();
-            }
-
-            var testInstance = new DbAccessTestClass {Name = "Test"};
-            var fakeAsyncCursor = (IAsyncCursor<DbAccessTestClass>) FakeAsyncCursor.CreateInstance(testInstance);
-            collection
-                .Setup(x => x.FindAsync(It.IsAny<Expression<Func<DbAccessTestClass, bool>>>()))
-                .ReturnsAsync(fakeAsyncCursor);
-
-            return new MongoContext<DbAccessTestClass>(logger, collection.Object);
+            return base.GetContext(() => new[] {_dummy}, success);
         }
 
         [Fact]
-        public void ReturnTrueWhenAddSucceeds()
+        public async Task ReturnTrueWhenAddSucceeds()
         {
-            var result = GetContext(false).Add(new DbAccessTestClass {Name = "Test"});
+            var result = await GetContext(false).AddAsync(_dummy);
             Assert.False(result);
         }
 
         [Fact]
-        public void ReturnFalseWhenSaveFails()
+        public async Task ReturnFalseWhenSaveFails()
         {
-            var result = GetContext().Add(new DbAccessTestClass {Name = "Test"});
+            var result = await GetContext().AddAsync(_dummy);
             Assert.True(result);
         }
 
         [Fact]
-        public async void GetSuccessfully()
+        public async Task GetSuccessfully()
         {
             var result = await GetContext()
-                .Get(ex => ex.Name == "Test");
+                .GetAsync(ex => ex.Name == "Test");
 
             Assert.NotEmpty(result);
         }

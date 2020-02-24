@@ -1,8 +1,16 @@
-﻿using LicencePlateCom.API.Utilities;
+﻿using System;
+using System.Linq.Expressions;
+using LicencePlateCom.API.Database;
+using LicencePlateCom.API.Database.Adapters;
+using LicencePlateCom.API.Database.Entities;
+using LicencePlateCom.API.Test.Fake;
+using LicencePlateCom.API.Utilities;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using MongoDB.Driver;
+using Moq;
 
 namespace LicencePlateCom.API.Test.Base
 {
@@ -35,9 +43,32 @@ namespace LicencePlateCom.API.Test.Base
             return Options.Create(settings);
         }
 
-        protected ILogger<T> GetLogger<T>()
+        protected virtual ILogger<T> GetLogger<T>()
         {
             return _loggerFactory.CreateLogger<T>();
+        }
+
+        protected virtual IMongoContext<T> GetContext<T>(Func<T[]> getTestInstance, bool success = true)
+            where T : ICollectible, new()
+        {
+            var logger = GetLogger<MongoContext<T>>();
+            var collection = new Mock<MongoCollectionAdapter<T>>();
+
+            var insertOneSetup = collection
+                .Setup(x =>
+                    x.InsertOneAsync(It.IsAny<T>()));
+            if (!success)
+            {
+                insertOneSetup.Throws<Exception>();
+            }
+
+            var obj = FakeAsyncCursor.CreateInstance(getTestInstance());
+            var fakeAsyncCursor = (IAsyncCursor<T>) obj;
+            collection
+                .Setup(x => x.FindAsync(It.IsAny<Expression<Func<T, bool>>>()))
+                .ReturnsAsync(fakeAsyncCursor);
+
+            return new MongoContext<T>(logger, collection.Object);
         }
     }
 }

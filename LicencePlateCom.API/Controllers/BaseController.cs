@@ -1,5 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using LicencePlateCom.API.Database.Entities;
 using LicencePlateCom.API.Utilities;
