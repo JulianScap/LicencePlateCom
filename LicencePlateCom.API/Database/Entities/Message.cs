@@ -5,26 +5,30 @@ namespace LicencePlateCom.API.Database.Entities
 {
     public class Message : AbstractEntity, IValidatable
     {
+        internal const string NoMessage = "No message specified (empty).";
+        internal const string NoRecipient = "No recipient specified.";
+        internal const string RecipientTooLong = "The recipient licence plate is too long.";
+
         public string Recipient { get; set; }
         public PredefinedMessage PredefinedMessage { get; set; }
 
-        public bool Validate(out IEnumerable<string> messages)
+        public bool Validate(out List<string> messages)
         {
             var list = new List<string>();
             messages = list;
 
             if (PredefinedMessage == PredefinedMessage.None)
             {
-                list.Add("No message specified (empty).");
+                list.Add(NoMessage);
             }
 
             if (string.IsNullOrWhiteSpace(Recipient))
             {
-                list.Add("No recipient specified.");
+                list.Add(NoRecipient);
             }
             else if (Recipient.Length > 10)
             {
-                list.Add("The recipient licence plate is too long.");
+                list.Add(RecipientTooLong);
             }
 
             return !list.Any();

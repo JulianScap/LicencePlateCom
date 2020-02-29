@@ -21,7 +21,7 @@ namespace LicencePlateCom.API.Controllers
             return base.BadRequest(new {Message = error});
         }
 
-        protected static bool Validate<T>(T item, out IEnumerable<string> messages, string paramName)
+        protected static bool Validate<T>(T item, out List<string> messages, string paramName)
             where T : class, IValidatable
         {
             if (item != default(T))
@@ -29,7 +29,7 @@ namespace LicencePlateCom.API.Controllers
                 return item.Validate(out messages);
             }
 
-            messages = new[] {$"No {paramName} specified (null)."};
+            messages = new List<string> {$"No {paramName} specified (null)."};
             return false;
         }
 

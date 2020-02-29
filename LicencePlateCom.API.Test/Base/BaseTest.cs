@@ -48,9 +48,18 @@ namespace LicencePlateCom.API.Test.Base
             return _loggerFactory.CreateLogger<T>();
         }
 
-        protected virtual IMongoContext<T> GetContext<T>(Func<T[]> getTestInstance, bool success = true)
+        protected virtual IMongoContext<T> GetContext<T>(Func<T[]> getTestInstance, bool success = true, bool throws = false)
             where T : ICollectible, new()
         {
+            if (throws)
+            {
+                var context = new Mock<MongoContext<T>>();
+                context.Setup(x => x.AddAsync(It.IsAny<T>()))
+                    .Throws<Exception>();
+                context.Setup(x => x.GetAsync(It.IsAny<Expression<Func<T, bool>>>()))
+                    .Throws<Exception>();
+                return context.Object;
+            }
             var logger = GetLogger<MongoContext<T>>();
             var collection = new Mock<MongoCollectionAdapter<T>>();
 

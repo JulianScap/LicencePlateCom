@@ -22,13 +22,15 @@ namespace LicencePlateCom.API.Database
         private readonly ILogger<MongoContext<T>> _logger;
         private readonly MongoCollectionAdapter<T> _collection;
 
+        public MongoContext() { }
+        
         public MongoContext(ILogger<MongoContext<T>> logger, MongoCollectionAdapter<T> collection)
         {
             _logger = logger;
             _collection = collection;
         }
 
-        public async Task<bool> AddAsync(T item)
+        public virtual async Task<bool> AddAsync(T item)
         {
             try
             {
@@ -42,7 +44,7 @@ namespace LicencePlateCom.API.Database
             }
         }
 
-        public async Task<IEnumerable<T>> GetAsync(Expression<Func<T, bool>> expression)
+        public virtual async Task<IEnumerable<T>> GetAsync(Expression<Func<T, bool>> expression)
         {
             var found = await _collection.FindAsync(expression).ConfigureAwait(false);
             return await found.ToListAsync().ConfigureAwait(false);

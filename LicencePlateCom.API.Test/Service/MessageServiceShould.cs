@@ -8,7 +8,7 @@ namespace LicencePlateCom.API.Test.Service
 {
     public class MessageServiceShould : BaseTest
     {
-        private Message _message = new Message
+        private readonly Message _message = new Message
         {
             Recipient = "VDF132",
             PredefinedMessage = PredefinedMessage.WeirdNoise
@@ -16,9 +16,9 @@ namespace LicencePlateCom.API.Test.Service
 
         protected virtual Message[] GetMessage() => new[] {_message};
 
-        protected virtual IMessageService GetMessageService(bool success = true)
+        protected virtual IMessageService GetMessageService(bool success = true, bool throws = false)
         {
-            return new MessageService(GetContext(GetMessage, success), GetLogger<MessageService>());
+            return new MessageService(GetContext(GetMessage, success, throws), GetLogger<MessageService>());
         }
 
         [Fact]
@@ -37,6 +37,17 @@ namespace LicencePlateCom.API.Test.Service
             var result = await service.SaveMessageAsync(_message);
 
             Assert.False(result.Success);
+        }
+
+        [Fact]
+        public async Task ReturnFalseOnException()
+        {
+            var service = GetMessageService(false, true);
+            var resultSave = await service.SaveMessageAsync(_message);
+            var resultGet = await service.GetMessagesAsync(x => x.Id == "test");
+
+            Assert.False(resultSave.Success);
+            Assert.False(resultGet.Success);
         }
 
         [Fact]

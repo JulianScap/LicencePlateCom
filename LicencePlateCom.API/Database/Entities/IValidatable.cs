@@ -4,6 +4,6 @@ namespace LicencePlateCom.API.Database.Entities
 {
     public interface IValidatable
     {
-        bool Validate(out IEnumerable<string> messages);
+        bool Validate(out List<string> messages);
     }
 }
