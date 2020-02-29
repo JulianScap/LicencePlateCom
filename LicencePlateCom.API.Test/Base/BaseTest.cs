@@ -48,19 +48,23 @@ namespace LicencePlateCom.API.Test.Base
             return _loggerFactory.CreateLogger<T>();
         }
 
-        protected virtual IMongoContext<T> GetContext<T>(Func<T[]> getTestInstance, bool success = true, bool throws = false)
+        protected virtual IMongoContext<T> GetContext<T>(Func<T[]> getTestInstance, bool success = true,
+            bool throws = false)
             where T : ICollectible, new()
         {
             if (throws)
             {
-                var context = new Mock<MongoContext<T>>();
-                context.Setup(x => x.AddAsync(It.IsAny<T>()))
-                    .Throws<Exception>();
-                context.Setup(x => x.GetAsync(It.IsAny<Expression<Func<T, bool>>>()))
-                    .Throws<Exception>();
-                return context.Object;
+                return MoqThrowingContext<T>();
             }
+
             var logger = GetLogger<MongoContext<T>>();
+            var collection = MoqCollection(getTestInstance, success);
+            return new MongoContext<T>(logger, collection);
+        }
+
+        protected virtual MongoCollectionAdapter<T> MoqCollection<T>(Func<T[]> getTestInstance, bool success = true)
+            where T : ICollectible, new()
+        {
             var collection = new Mock<MongoCollectionAdapter<T>>();
 
             var insertOneSetup = collection
@@ -77,7 +81,17 @@ namespace LicencePlateCom.API.Test.Base
                 .Setup(x => x.FindAsync(It.IsAny<Expression<Func<T, bool>>>()))
                 .ReturnsAsync(fakeAsyncCursor);
 
-            return new MongoContext<T>(logger, collection.Object);
+            return collection.Object;
+        }
+
+        protected virtual IMongoContext<T> MoqThrowingContext<T>() where T : ICollectible, new()
+        {
+            var context = new Mock<MongoContext<T>>();
+            context.Setup(x => x.AddAsync(It.IsAny<T>()))
+                .Throws<Exception>();
+            context.Setup(x => x.GetAsync(It.IsAny<Expression<Func<T, bool>>>()))
+                .Throws<Exception>();
+            return context.Object;
         }
     }
 }

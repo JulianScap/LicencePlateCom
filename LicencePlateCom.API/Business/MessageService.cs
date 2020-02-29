@@ -11,11 +11,11 @@ namespace LicencePlateCom.API.Business
 {
     public interface IMessageService
     {
-        Task<Result<IEnumerable<Message>>> GetMessagesAsync(Expression<Func<Message, bool>> expression);
+        Task<Result<List<Message>>> GetMessagesAsync(Expression<Func<Message, bool>> expression);
         Task<Result> SaveMessageAsync(Message message);
     }
 
-    public class MessageService : IMessageService
+    public class MessageService : BaseService<Message>, IMessageService
     {
         private readonly IMongoContext<Message> _mongoContext;
         private readonly ILogger<MessageService> _logger;
@@ -26,12 +26,18 @@ namespace LicencePlateCom.API.Business
             _logger = logger;
         }
 
+        public MessageService() { }
+
         public virtual async Task<Result> SaveMessageAsync(Message message)
         {
             try
             {
+                if (!Validate(message, out var validationMessages))
+                {
+                    return Return.New(false, validationMessages.ToArray());
+                }
                 var result = await _mongoContext.AddAsync(message).ConfigureAwait(false);
-                return Return.Success(result);
+                return Return.New(result);
             }
             catch (Exception ex)
             {
@@ -40,7 +46,7 @@ namespace LicencePlateCom.API.Business
             }
         }
 
-        public virtual async Task<Result<IEnumerable<Message>>> GetMessagesAsync(
+        public virtual async Task<Result<List<Message>>> GetMessagesAsync(
             Expression<Func<Message, bool>> expression)
         {
             try
@@ -51,7 +57,7 @@ namespace LicencePlateCom.API.Business
             catch (Exception ex)
             {
                 _logger.LogError(ex, "GetMessagesAsync Failed");
-                return Return.Failed<IEnumerable<Message>>();
+                return Return.Failed<List<Message>>();
             }
         }
     }

@@ -22,6 +22,29 @@ namespace LicencePlateCom.API.Test.Service
         }
 
         [Fact]
+        public async Task ValidateOnSave()
+        {
+            var service = GetMessageService();
+            var result = await service.SaveMessageAsync(new Message
+            {
+                PredefinedMessage = PredefinedMessage.None
+            });
+
+            Assert.False(result.Success);
+            Assert.NotEmpty(result.Messages);
+        }
+
+        [Fact]
+        public async Task ValidateOnSaveNull()
+        {
+            var service = GetMessageService();
+            var result = await service.SaveMessageAsync(null);
+
+            Assert.False(result.Success);
+            Assert.NotEmpty(result.Messages);
+        }
+
+        [Fact]
         public async Task ReturnTrueOnSuccessfulSave()
         {
             var service = GetMessageService();

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
 using LicencePlateCom.API.Database.Adapters;
@@ -13,7 +14,7 @@ namespace LicencePlateCom.API.Database
         where T : ICollectible, new()
     {
         Task<bool> AddAsync(T item);
-        Task<IEnumerable<T>> GetAsync(Expression<Func<T, bool>> expression);
+        Task<List<T>> GetAsync(Expression<Func<T, bool>> expression);
     }
 
     public class MongoContext<T> : IMongoContext<T>
@@ -22,8 +23,10 @@ namespace LicencePlateCom.API.Database
         private readonly ILogger<MongoContext<T>> _logger;
         private readonly MongoCollectionAdapter<T> _collection;
 
+        [SuppressMessage("ReSharper", "UnusedMember.Global", Justification = "Used in tests")]
+        [Obsolete("Do not use", true)]
         public MongoContext() { }
-        
+
         public MongoContext(ILogger<MongoContext<T>> logger, MongoCollectionAdapter<T> collection)
         {
             _logger = logger;
@@ -44,7 +47,7 @@ namespace LicencePlateCom.API.Database
             }
         }
 
-        public virtual async Task<IEnumerable<T>> GetAsync(Expression<Func<T, bool>> expression)
+        public virtual async Task<List<T>> GetAsync(Expression<Func<T, bool>> expression)
         {
             var found = await _collection.FindAsync(expression).ConfigureAwait(false);
             return await found.ToListAsync().ConfigureAwait(false);

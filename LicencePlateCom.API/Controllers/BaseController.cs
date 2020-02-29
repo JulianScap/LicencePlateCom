@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using LicencePlateCom.API.Database.Entities;
+﻿using System.Linq;
 using LicencePlateCom.API.Utilities;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
@@ -18,19 +16,7 @@ namespace LicencePlateCom.API.Controllers
         
         public BadRequestObjectResult BadRequest(string error)
         {
-            return base.BadRequest(new {Message = error});
-        }
-
-        protected static bool Validate<T>(T item, out List<string> messages, string paramName)
-            where T : class, IValidatable
-        {
-            if (item != default(T))
-            {
-                return item.Validate(out messages);
-            }
-
-            messages = new List<string> {$"No {paramName} specified (null)."};
-            return false;
+            return base.BadRequest(new Error{Text = error});
         }
 
         protected IActionResult Result(Result result)
@@ -65,5 +51,10 @@ namespace LicencePlateCom.API.Controllers
 
             return result.HasItem ? (IActionResult) Ok(result.Item) : Ok();
         }
+    }
+
+    public class Error
+    {
+        public string Text { get; set; }
     }
 }

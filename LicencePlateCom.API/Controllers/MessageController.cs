@@ -13,14 +13,14 @@ namespace LicencePlateCom.API.Controllers
         private readonly ILogger<MessageController> _logger;
         private readonly IMessageService _messageService;
 
-        public MessageController(ILogger<MessageController> logger, IMessageService messageService) : base(logger)
+        public MessageController(IMessageService messageService, ILogger<MessageController> logger) : base(logger)
         {
-            _logger = logger;
             _messageService = messageService;
+            _logger = logger;
         }
 
         [HttpGet("{licencePlate}")]
-        public ActionResult Get(string licencePlate)
+        public async Task<IActionResult> Get(string licencePlate)
         {
             if (string.IsNullOrWhiteSpace(licencePlate))
             {
@@ -28,26 +28,20 @@ namespace LicencePlateCom.API.Controllers
                 return BadRequest("No license plate specified.");
             }
 
-            return Ok(new[]
-            {
-                new Message
-                {
-                    PredefinedMessage = PredefinedMessage.WeirdNoise,
-                    Recipient = licencePlate
-                }
-            });
+            var result = await _messageService.GetMessagesAsync(x => x.Recipient == licencePlate).ConfigureAwait(false);
+
+            return Ok(result.Item);
         }
 
         [HttpPut]
         public async Task<IActionResult> Put([FromBody] Message message)
         {
-            if (!Validate(message, out var messages, nameof(message)))
+            if (message == null)
             {
-                return BadRequest(messages);
+                return BadRequest();
             }
 
             var saveResult = await _messageService.SaveMessageAsync(message);
-
             return Result(saveResult);
         }
     }

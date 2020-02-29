@@ -6,9 +6,10 @@ namespace LicencePlateCom.API.Utilities
     {
         private bool _success;
 
-        public Result(bool success = true)
+        public Result(bool success, params string[] messages)
         {
             _success = success;
+            Messages = messages;
         }
 
         public virtual bool Success
@@ -16,7 +17,7 @@ namespace LicencePlateCom.API.Utilities
             get => _success;
             set => _success = value;
         }
-        
+
         public virtual bool HasItem => false;
         public IEnumerable<string> Messages { get; set; }
 
@@ -29,33 +30,41 @@ namespace LicencePlateCom.API.Utilities
     {
         private T _item;
 
-        public Result(bool success):base(success) { }
-        public Result(T item): this(true)
+        public Result(bool success, params string[] messages) : base(success, messages)
+        {
+        }
+
+        public Result(T item, params string[] messages) : this(true, messages)
         {
             _item = item;
         }
 
         public override bool HasItem => Item != default(T);
-        public T Item { get => _item; set => _item = value; }
+
+        public T Item
+        {
+            get => _item;
+            set => _item = value;
+        }
     }
 
     public static class Return
     {
-        public static Result<T> Failed<T>()
+        public static Result<T> Failed<T>(params string[] messages)
             where T : class
         {
-            return new Result<T>(false);
+            return new Result<T>(false, messages);
         }
 
-        public static Result<T> Success<T>(T item)
+        public static Result<T> Success<T>(T item, params string[] messages)
             where T : class
         {
-            return new Result<T>(item);
+            return new Result<T>(item, messages);
         }
 
-        public static Result Success(bool success)
+        public static Result New(bool success, params string[] messages)
         {
-            return new Result(success);
+            return new Result(success, messages);
         }
     }
 }
