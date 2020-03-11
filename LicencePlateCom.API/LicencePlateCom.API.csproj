@@ -2,6 +2,12 @@
     <PropertyGroup>
         <TargetFramework>netcoreapp3.1</TargetFramework>
     </PropertyGroup>
+    <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+      <CodeAnalysisRuleSet>LicencePlateCom.API.ruleset</CodeAnalysisRuleSet>
+    </PropertyGroup>
+    <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+      <CodeAnalysisRuleSet>LicencePlateCom.API.ruleset</CodeAnalysisRuleSet>
+    </PropertyGroup>
     <ItemGroup>
         <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleTo">
             <_Parameter1>$(AssemblyName).Test</_Parameter1>
